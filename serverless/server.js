@@ -32,7 +32,7 @@ const typeDefs = `#graphql
   type Mutation {
     addItem(values: ItemInput): Boolean
     updateItem(values: ItemInput): Boolean
-    deleteItem(id: Int!): Boolean
+    deleteItem(id: ID!): Boolean
   }
 `;
 
@@ -56,8 +56,12 @@ const resolvers = {
       console.log(id, name);
     },
     deleteItem: (_, { id }) => {
-      // Aqui você irá implementar a remoção do item
-      console.log(id);
+      const index = TODO_LIST.findIndex((item) => item.id === Number(id) /* Converte o id recebido no parametro para número, assim pode ser encontrado dentro do array de objetos */)
+      if (index === -1) {
+        return false // Retorna false se o item não for encontrado
+      }
+      TODO_LIST.splice(index, 1) // Remove o item da lista
+      return true // Retorna true se a remoção for bem-sucedida
     },
   },
 };

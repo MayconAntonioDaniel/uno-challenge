@@ -14,3 +14,11 @@ export const ADD_ITEM_MUTATION = gql`
     addItem(values: $values)
   }
 `;
+
+
+// Esta mutação é usada para excluir um item da lista de tarefas
+export const DELETE_ITEM_MUTATION = gql`
+  mutation deleteItem($id: ID!) {
+    deleteItem(id: $id)
+  }
+`;
