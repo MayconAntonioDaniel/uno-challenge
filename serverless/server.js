@@ -52,8 +52,12 @@ const resolvers = {
       });
     },
     updateItem: (_, { values: { id, name } }) => {
-      // Aqui você irá implementar a edição do item
-      console.log(id, name);
+      const index = TODO_LIST.findIndex((item) => item.id === Number(id)) // Localiza o índice do item pelo id
+      if (index === -1) {
+        return false // Retorna false se o item não for encontrado
+      }
+      TODO_LIST[index].name = name // Atualiza o nome do item
+      return true // Retorna true se a atualização for bem-sucedida
     },
     deleteItem: (_, { id }) => {
       const index = TODO_LIST.findIndex((item) => item.id === Number(id) /* Converte o id recebido no parametro para número, assim pode ser encontrado dentro do array de objetos */)

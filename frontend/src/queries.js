@@ -22,3 +22,10 @@ export const DELETE_ITEM_MUTATION = gql`
     deleteItem(id: $id)
   }
 `;
+
+// Esta mutação é usada para atualizar um item da lista de tarefas
+export const UPDATE_ITEM_MUTATION = gql`
+  mutation updateItem($values: ItemInput) {
+    updateItem(values: $values)
+  }
+`;
