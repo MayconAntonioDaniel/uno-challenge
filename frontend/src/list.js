@@ -2,7 +2,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import { Alert, Button, CircularProgress, IconButton, TextField } from "@mui/material";
+import { Alert, Button, CircularProgress, Grid, IconButton, TextField, Typography } from "@mui/material";
 import { styled } from "styled-components";
 import { useMutation, useQuery } from "@apollo/client";
 import { ADD_ITEM_MUTATION, DELETE_ITEM_MUTATION, GET_TODO_LIST } from "./queries";
@@ -59,7 +59,7 @@ const Title = styled.div`
 const INITIAL_EDITING_STATE = {
   currentOpen: '',
   value: '',
-  error: '',
+  error: false,
   loadingDel: '',
   loadingSave: false,
 }
@@ -69,12 +69,31 @@ export default function CheckboxList() {
   const [addItem] = useMutation(ADD_ITEM_MUTATION);
   const [deleteItem] = useMutation(DELETE_ITEM_MUTATION);
   const [editing, setEditing] = useState(INITIAL_EDITING_STATE);
-  const [alert, setAlert] = useState({ visible: false, message: "", severity: "" });
+  const [alert, setAlert] = useState({ visible: false, message: "", severity: "" })
+
+  const handleNameValidation = (newName) => {
+    // Verifica condição, caso encontre salva true na variavel hasName
+    const hasName = data.todoList.some(item => item.name.toLowerCase() === newName.toLowerCase().trim())
+
+    // Caso entre no if, mensagem de alerta é oferecida ao usuário retornando true
+    if (hasName) {
+      setAlert({ visible: true, message: "Nome já existente, por favor insira outra nome!", severity: "warning" })
+      setEditing((prevState) => ({ ...prevState, loadingSave: false, error: true }))
+      return true
+    }
+    return false
+  }
 
   const onSubmit = async (event) => {
     setEditing((prevState) => ({ ...prevState, loadingSave: true }))// Define o estado de carregamento para true
     event.preventDefault();
-    
+
+    // Chamada de função para verificar nome existente, se true a função onSubmit não executa
+    if (handleNameValidation(editing.value)) {
+      setTimeout(() => { setAlert({ ...alert, visible: false }) }, 3000) 
+      return 
+    } 
+
     try {
       // Simula um atraso de 2 segundos antes de executar
       await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -82,7 +101,7 @@ export default function CheckboxList() {
       await addItem({
         variables: {
           values: {
-            name: editing.value,
+            name: editing.value.trim(),
           },
         },
         awaitRefetchQueries: true,
@@ -93,7 +112,7 @@ export default function CheckboxList() {
     } catch (error) {
       setAlert({ visible: true, message: "Erro ao Adicionar o item!", severity: "error" })
     } finally {
-      setEditing((prevState) => ({ ...prevState, loadingSave: false, value: '' })) // Limpa os estados
+      setEditing((prevState) => ({ ...prevState, loadingSave: false, value: '', error: false })) // Limpa os estados
       setTimeout(() => {
         setAlert({ ...alert, visible: false })
       }, 2000) // Reseta o estado do alerta após 2 segundos
@@ -141,8 +160,9 @@ export default function CheckboxList() {
         <Title>TODO LIST</Title>
         <ContainerTop onSubmit={onSubmit}>
           <TextField
+            error= { editing.error }
             id="item"
-            label="Digite aqui"
+            label={ editing.error ? 'Esse nome já existe' : 'Digite aqui o nome da lista de tarefas' } 
             value={ editing.value }
             type="text"
             variant="standard"
@@ -169,7 +189,7 @@ export default function CheckboxList() {
           </ContainerButton>
         </ContainerTop>
         <List sx={{ width: "100%" }}>
-          { data?.todoList?.length > 0 && 
+          { data?.todoList?.length > 0 ?
             <ContainerListItem>
               { data?.todoList?.map((value, index) => {
                 return (
@@ -188,13 +208,19 @@ export default function CheckboxList() {
                         <Edit/>
                       </IconButton>
                       <IconButton onClick={ () => onDelete(value.id) } /* Passa o ID do item para a função de deletar */ > 
-                        { editing.loadingDel === value.id ? <CircularProgress color="error" size={ '25px' } /> : <Delete color="error"  /> } 
+                        { editing.loadingDel === value.id ? <CircularProgress color="error" size={ '20px' } /> : <Delete color="error"  /> } 
                       </IconButton>
                     {/* </ListItemButton> */}
                   </ListItem>
                 );
               })}
             </ContainerListItem>
+          : 
+            <Grid container alignItems='center' display='flex'>
+              <Grid item xs={ 12 }>
+                <Typography variant="h6">Não possui itens!</Typography>
+              </Grid>
+            </Grid>
           }
         </List>
       </ContainerList>
