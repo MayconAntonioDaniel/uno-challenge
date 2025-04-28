@@ -1,8 +1,9 @@
 import { gql } from "@apollo/client";
 
+// Esta consulta é usada para obter a lista de tarefas
 export const GET_TODO_LIST = gql`
-  query todoList {
-    todoList {
+  query todoList($filter: ItemFilter, $sort: SortDirection) {
+    todoList(filter: $filter, sort: $sort) {
       id
       name
     }
